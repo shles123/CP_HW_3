@@ -33,8 +33,8 @@ def test_get_all_dishes():
     assert len(response.json()) == 3
 
 #4
-def test_get_bad_dish():
-    response = connectionController.http_get("blah")
+def test_post_bad_dish():
+    response = connectionController.http_post("dishes", {"name" : "blah"})
     assert response.status_code in [404, 422, 400]
     assert response.json() == -3
 
@@ -62,6 +62,18 @@ def test_get_meal():
     assert_err_code(response, 200)
     assert len(response.json()) == 1
     assert response.json()["1"]["cal"] <=500 and 400<=response.json()["1"]["cal"]
+
+#8
+def test_post_delicious_twice():
+    meal = {
+        "name" : "delicious",
+        "appetizer" : dishes[0],
+        "main" : dishes[1],
+        "dessert" : dishes[2]
+    }
+    response = connectionController.http_post("meals", meal)
+    assert response.json() == -2
+    assert response.status_code in [400, 422]
 
 # def test_dishes_sanity():
 #     response = connectionController.http_get("dishes")
