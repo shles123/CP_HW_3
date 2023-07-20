@@ -150,21 +150,21 @@ jobs:
       - name: Install curl and jq
         run: sudo apt-get install -y curl jq
 
-      # - name: Submit queries and record responses
-      #   run: |
-      #     while read dish; do
-      #       echo "$dish" >> response.txt
-      #     done < query.txt
+      - name: Submit queries and record responses
+        run: |
+          while read dish; do
+            echo "$dish" >> response.txt
+          done < query.txt
 
-      # - name: Upload reponse file
-      #   if: always()
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Responses
-      #     path: response.txt
+      - name: Upload reponse file
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Responses
+          path: response.txt
 
-      # - name: Remove unused artifacts
-      #   if: always()
-      #   uses: geekyeggo/delete-artifact@v2
-      #   with:
-      #       name: meals-api
+      - name: Remove unused artifacts
+        if: always()
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: meals-api
