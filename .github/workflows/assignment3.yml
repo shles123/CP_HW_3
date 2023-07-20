@@ -1,8 +1,5 @@
-name: Service Workflow
-on:
-  push:
-    branches:
-      - main
+name: assignment3
+on: push
 
 jobs:
   build:
@@ -24,11 +21,33 @@ jobs:
           tags: meals:latest
           outputs: type=docker, dest=/tmp/image.tar
 
-      - name: Upload artifact
+      - name: Upload image artifact
         uses: actions/upload-artifact@v3
         with:
-          name: wordsvr
+          name: meals
           path: /tmp/image.tar
+      - name: Write build result to file
+        if: always()
+        run: |
+          datetime=$(date -Iminutes)
+          names="Noah Schlesinger"
+          echo $datetime >> log.txt
+          echo $names >> log.txt
+
+      - name: Log successful build
+        if: success()
+        run: echo "Image successfully built" >> log.txt
+
+      - name: Log failed build
+        if: failure()
+        run: echo "Image not able to be built" >> log.txt
+
+      - name: Upload result file
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Logs
+          path: log.txt
 
   # test:
   #   name: test
