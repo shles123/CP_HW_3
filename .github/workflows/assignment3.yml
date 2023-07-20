@@ -89,29 +89,29 @@ jobs:
           pip install requests
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-  #     #3. run pytest tests and check results
-  #     - name: Test with pytest # additionally use ruff or other lint checkers
-  #       run: |
-  #         cd pytest-code
-  #         pytest -v test_word.py > test_results.txt
-  #     - name: upload test results
-  #       if: always() # always perform this step even if tests fail, to see results
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: GH_test_results
-  #         path: pytest-code/test_results.txt
-  #     - name: Write test result to log file
-  #       if: always() # always perform this step even if tests fail, to see results
-  #       run: |
-  #         if grep -q "FAILED" pytest-code/test_results.txt; then
-  #           echo "tests failed" >> Logs/log.txt
-  #         else
-  #           echo "tests succeeded" >> Logs/log.txt
-  #         fi
+      #     #3. run pytest tests and check results
+      - name: Test with pytest # additionally use ruff or other lint checkers
+        run: |
+          cd pytest-code
+          pytest -v test_word.py > test_results.txt
+      - name: upload test results
+        if: always() # always perform this step even if tests fail, to see results
+        uses: actions/upload-artifact@v3
+        with:
+          name: GH_test_results
+          path: pytest-code/test_results.txt
+      - name: Write test result to log file
+        if: always() # always perform this step even if tests fail, to see results
+        run: |
+          if grep -q "FAILED" pytest-code/test_results.txt; then
+            echo "tests failed" >> Logs/log.txt
+          else
+            echo "tests succeeded" >> Logs/log.txt
+          fi
 
-  #     - name: Upload updated log file
-  #       if: always()
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: Logs
-  #         path: Logs/log.txt
+      - name: Upload updated log file
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Logs
+          path: Logs/log.txt
