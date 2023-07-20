@@ -68,7 +68,7 @@ jobs:
       #     #   run: docker stop mealsCont || true && docker rm mealsCont || true
 
       - name: run image in container
-        run: docker run --name mealsCont -p 8000:8000 meals
+        run: docker run --name mealsCont -p 8000:8000 meals &
 
       - name: Write container to log
         run: |
