@@ -93,7 +93,7 @@ jobs:
       - name: Test with pytest # additionally use ruff or other lint checkers
         run: |
           cd pytest-code
-          pytest -v test_word.py > test_results.txt
+          pytest -v test.py > test_results.txt
       - name: upload test results
         if: always() # always perform this step even if tests fail, to see results
         uses: actions/upload-artifact@v3
