@@ -273,7 +273,7 @@ class MealsName(Resource):
     
     def  delete(self, name):
         return mealCol.deleteMealByName(name)
-#comment for change
+#comment for changeasda
 api.add_resource(Dishes, '/dishes')
 api.add_resource(DishesKey, '/dishes/<int:key>')
 api.add_resource(DishesName, '/dishes/<string:name>')
