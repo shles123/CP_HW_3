@@ -50,13 +50,13 @@ jobs:
           name: Logs
           path: log.txt
 
-  # test:
-  #   name: test
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
   #     - name: Download artifact
   #       uses: actions/download-artifact@v3 # downloads all artifacts
