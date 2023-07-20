@@ -58,11 +58,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-  #     - name: Download artifact
-  #       uses: actions/download-artifact@v3 # downloads all artifacts
+      - name: Download artifact
+        uses: actions/download-artifact@v3 # downloads all artifacts
 
-  #     - name: Load Docker images from previous workflows
-  #       run: docker load --input meals/image.tar
+      - name: Load Docker images from previous workflows
+        run: docker load --input meals/image.tar
 
   #     # - name: Stop and remove the container (if it exists)
   #     #   run: docker stop mealsCont || true && docker rm mealsCont || true
