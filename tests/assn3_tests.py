@@ -9,6 +9,7 @@ orange_id = 0
 
 #1
 def test_post_dishes():
+    global orange_id
     orange_id = add_dish("orange")
     spaghetti_id = add_dish("spaghetti")
     applePie_id = add_dish("applie pie")
@@ -17,21 +18,22 @@ def test_post_dishes():
 
 #2
 def test_get_orange_by_id():
+    global orange_id
     response = connectionController.http_get(f"dishes/{orange_id}")
     assert_err_code(response, error_code=200)
     assert response.json()['sodium'] <= 1.1 and 0.9 <= response.json()['sodium']
 
-# #3
-# def test_get_all_dishes():
-#     response = connectionController.http_get("dishes")
-#     assert_err_code(response, 200)
-#     assert len(response.json() == 3)
+#3
+def test_get_all_dishes():
+    response = connectionController.http_get("dishes")
+    assert_err_code(response, 200)
+    assert len(response.json() == 3)
 
-# #4
-# def test_get_bad_dish():
-#     response = connectionController.http_get("blah")
-#     assert_err_code(response, 422)
-#     assert response.json() == -3
+#4
+def test_get_bad_dish():
+    response = connectionController.http_get("blah")
+    assert_err_code(response, 422)
+    assert response.json() == -3
 
 # def test_dishes_sanity():
 #     response = connectionController.http_get("dishes")
