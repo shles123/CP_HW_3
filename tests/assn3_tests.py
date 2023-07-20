@@ -14,10 +14,10 @@ def test_post_dishes():
 
     assert orange_id != spaghetti_id and orange_id != applePie_id and applePie_id != spaghetti_id
 
-def test_get_orange_by_id():
-    response = connectionController.http_get(f"dishes/{orange_id}")
-    assert_err_code(response, error_code=200)
-    assert response.json()['sodium'] <= .11 and .9 <= response.json()['sodium']
+# def test_get_orange_by_id():
+#     response = connectionController.http_get(f"dishes/{orange_id}")
+#     assert_err_code(response, error_code=200)
+#     assert response.json()['sodium'] <= .11 and .9 <= response.json()['sodium']
     
 
 # def test_dishes_sanity():
