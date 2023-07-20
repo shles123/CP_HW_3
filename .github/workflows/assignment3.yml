@@ -140,31 +140,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
 
-      - name: Install python dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pytest # not using yet lint checker like ruff
           pip install requests
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      
-      - name: Install curl and jq
-        run: sudo apt-get install -y curl jq
-      
-      - name: Submit queries and record responses
-      run: |
-        while read dish; do
-          echo "$dish" >> response.txt
-        done < query.txt
-
-    - name: Upload reponse file
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: Responses
-        path: response.txt
-
-    - name: Remove unused artifacts
-      if: always()
-      uses: geekyeggo/delete-artifact@v2
-      with:
-          name: meals-api
