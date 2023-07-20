@@ -7,6 +7,7 @@ from restApiController import *
 # tests for dish API
 orange_id = 0
 
+#1
 def test_post_dishes():
     orange_id = add_dish("orange")
     spaghetti_id = add_dish("spaghetti")
@@ -14,11 +15,20 @@ def test_post_dishes():
 
     assert orange_id != spaghetti_id and orange_id != applePie_id and applePie_id != spaghetti_id
 
-# def test_get_orange_by_id():
-#     response = connectionController.http_get(f"dishes/{orange_id}")
-#     assert_err_code(response, error_code=200)
-#     assert response.json()['sodium'] <= .11 and .9 <= response.json()['sodium']
-    
+#2
+def test_get_orange_by_id():
+    response = connectionController.http_get(f"dishes/{orange_id}")
+    assert_err_code(response, error_code=200)
+    assert response.json()['sodium'] <= 1.1 and 0.9 <= response.json()['sodium']
+
+#3
+def test_get_all_dishes():
+    response = connectionController.http_get("dishes")
+    assert_err_code(response, 200)
+    assert len(response.json() == 3)
+
+#4
+
 
 # def test_dishes_sanity():
 #     response = connectionController.http_get("dishes")
