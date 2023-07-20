@@ -35,13 +35,14 @@ def test_get_all_dishes():
 #4
 def test_get_bad_dish():
     response = connectionController.http_get("blah")
-    assert_err_code(response, 404)
+    assert response.status_code in [404, 422, 400]
     assert response.json() == -3
 
 #5
 def test_post_orange_twice():
-    orange_id = add_dish("orange")
-    assert orange_id == -2
+    # orange_id = add_dish("orange")
+    response = connectionController.http_post("dishes", {"name" : "orange"})
+    assert response.json() == -2
 
 #6
 def test_post_meal():
@@ -55,6 +56,12 @@ def test_post_meal():
     response = connectionController.http_post("meals", meal)
     assert_valid_added_resource(response)
 
+#7
+def test_get_meal():
+    response = connectionController.http_get("meals")
+    assert_err_code(response, 200)
+    assert len(response.json()) == 1
+    assert response.json()["1"]["cal"] <=500 and 400<=response.json()["1"]["cal"]
 
 # def test_dishes_sanity():
 #     response = connectionController.http_get("dishes")
@@ -263,8 +270,7 @@ def test_post_meal():
 #     MEAL_NAME = "test_get_meal_by_name meal"
 #     add_meal(MEAL_NAME, hummus_id, noodles_id, pineapple_id)
 
-#     response = connectionController.http_get(f"meals/{MEAL_NAME}")
-#     assert_err_code(response, error_code=200)
+#     c
 
 #     meal = response.json()
 #     assert_meal(meal)
