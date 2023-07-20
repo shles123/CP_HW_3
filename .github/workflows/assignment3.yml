@@ -153,8 +153,7 @@ jobs:
       - name: Submit queries and record responses
       run: |
         while read dish; do
-          id=$(curl -X POST -H "Content-Type: application/json" -d "{\"name\":\"$dish\"}" http://localhost:8000/dishes)
-          echo "$name contains $calories calories, $sodium mgs of sodium, and $sugar grams of sugar" >> response.txt
+          echo "$dish" >> response.txt
         done < query.txt
 
     - name: Upload reponse file
