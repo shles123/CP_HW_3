@@ -26,6 +26,9 @@ jobs:
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3 # downloads all artifacts
+        with:
+          name: meals # The name here should match the one used in the upload-artifact step
+          path: .
       - name: Load Docker images from previous workflows
         run: docker load --input meals/image.tar
       - name: run image in container
