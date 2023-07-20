@@ -27,12 +27,12 @@ def test_get_orange_by_id():
 def test_get_all_dishes():
     response = connectionController.http_get("dishes")
     assert_err_code(response, 200)
-    assert len(response.json() == 3)
+    assert len(response.json()) == 3
 
 #4
 def test_get_bad_dish():
     response = connectionController.http_get("blah")
-    assert_err_code(response, 422)
+    assert_err_code(response, 404)
     assert response.json() == -3
 
 # def test_dishes_sanity():
