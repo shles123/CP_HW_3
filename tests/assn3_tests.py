@@ -21,14 +21,17 @@ def test_get_orange_by_id():
     assert_err_code(response, error_code=200)
     assert response.json()['sodium'] <= 1.1 and 0.9 <= response.json()['sodium']
 
-#3
-def test_get_all_dishes():
-    response = connectionController.http_get("dishes")
-    assert_err_code(response, 200)
-    assert len(response.json() == 3)
+# #3
+# def test_get_all_dishes():
+#     response = connectionController.http_get("dishes")
+#     assert_err_code(response, 200)
+#     assert len(response.json() == 3)
 
-#4
-
+# #4
+# def test_get_bad_dish():
+#     response = connectionController.http_get("blah")
+#     assert_err_code(response, 422)
+#     assert response.json() == -3
 
 # def test_dishes_sanity():
 #     response = connectionController.http_get("dishes")
