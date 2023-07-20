@@ -89,7 +89,7 @@ jobs:
           pip install requests
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      #     #3. run pytest tests and check results
+      #3. run pytest tests and check results
       - name: Test with pytest # additionally use ruff or other lint checkers
         run: |
           cd pytest-code
