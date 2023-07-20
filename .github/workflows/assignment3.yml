@@ -19,14 +19,15 @@ jobs:
           context: .
           file: ./Dockerfile
           tags: meals:latest
-          outputs: type=docker, dest=/tmp/image.tar
+          outputs: type=docker,dest=/tmp/image.tar
 
       - name: Upload image artifact
         uses: actions/upload-artifact@v3
         with:
           name: meals
           path: /tmp/image.tar
-      - name: Write build result to file
+
+      - name: Log build result
         if: always()
         run: |
           datetime=$(date -Iminutes)
@@ -34,15 +35,15 @@ jobs:
           echo $datetime >> log.txt
           echo $names >> log.txt
 
-      - name: Log successful build
+      - name: Log build result success
         if: success()
-        run: echo "Image successfully built" >> log.txt
+        run: echo "Mmage built successfully" >> log.txt
 
-      - name: Log failed build
+      - name: Log build result fail
         if: failure()
         run: echo "Image not able to be built" >> log.txt
 
-      - name: Upload result file
+      - name: Log build result final
         if: always()
         uses: actions/upload-artifact@v3
         with:
