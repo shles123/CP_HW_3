@@ -64,20 +64,20 @@ jobs:
       - name: Load Docker images from previous workflows
         run: docker load --input meals/image.tar
 
-  #     # - name: Stop and remove the container (if it exists)
-  #     #   run: docker stop mealsCont || true && docker rm mealsCont || true
+      #     # - name: Stop and remove the container (if it exists)
+      #     #   run: docker stop mealsCont || true && docker rm mealsCont || true
 
-  #     - name: run image in container
-  #       run: docker run --name mealsCont -p 8000:8000 meals &
+      - name: run image in container
+        run: docker run --name mealsCont -p 8000:8000 meals &
 
-  #     - name: Write container to log
-  #       run: |
-  #         CONTAINER_NAME="meals-container"
-  #         if docker ps --format '{{.Names}}' | grep -q '^mealsCont$'; then
-  #           echo "Container running" >> Logs/log.txt
-  #         else
-  #           echo "Container failed to run" >> Logs/log.txt
-  #         fi
+      - name: Write container to log
+        run: |
+          CONTAINER_NAME="meals-container"
+          if docker ps --format '{{.Names}}' | grep -q '^mealsCont$'; then
+            echo "Container running" >> Logs/log.txt
+          else
+            echo "Container failed to run" >> Logs/log.txt
+          fi
   #     #2. set up python and pytest environment
   #     - name: Set up Python
   #       uses: actions/setup-python@v4
