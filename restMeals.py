@@ -205,36 +205,36 @@ class mealCollection:
 
     def deleteMealById(self, id):
         if id not in self.mealColFormated:
-            return make_response("-5", 404)
+            return -5, 404
         name = self.mealColFormated[id]['name']
         self.mealColFormated.pop(id)
         self.mealList.remove(name)
-        return int(id)
+        return int(id), 200
     
     def replaceMeal(self, key):
         if request.content_type != "application/json":
-            return "0", 415
+            return 0, 415
         
         if ('name' not in request.json) or ('appetizer' not in request.json) or ('dessert' not in request.json) or ('main' not in request.json):
-            return '-1', 422
+            return -1, 422
         
         for i_key, values in self.mealColFormated.items():
             if (values['name'] == request.json['name']) and (i_key != key):
-                return '-2', 422
+                return -2, 422
 
         meal = self.mealColFormated[key]
 
         if (request.json['appetizer'] != meal['appetizer']) or (request.json['main']) != meal['main'] or (request.json['dessert'] != meal['dessert']):
             ingredientAmt = self.calcIngredientsAmt(request.json)
             if ingredientAmt == 0:
-                return make_response('-6', 422)
+                return -6, 422
             key = self.insertFormated(request.json, ingredientAmt, key)
         if request.json['name'] != meal['name']:
             self.mealList.remove(meal['name'])
             self.mealList.append(request.json['name'])
             meal['name'] = request.json['name']
         
-        return key
+        return int(key), 200
 
 mealCol = mealCollection()
 
@@ -243,7 +243,7 @@ class Meals(Resource):
     
     def post(self):
         if request.content_type != "application/json":
-            return "0", 415
+            return 0, 415
         keys = mealCol.insertMeal(request.json)
         return keys[0], keys[1]
     
@@ -265,7 +265,7 @@ class MealsKey(Resource):
     def put(self, key):
         if str(key) in mealCol.mealColFormated:
             return mealCol.replaceMeal(str(key))
-        return make_response("-2", 422)
+        return make_response(-2, 422)
 
 class MealsName(Resource):
     def get(self, name):
