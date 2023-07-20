@@ -5,21 +5,24 @@ from restApiController import *
 
 
 # tests for dish API
-orange_id = 0
+dishes = []
 
 #1
 def test_post_dishes():
-    global orange_id
+    global dishes
+
     orange_id = add_dish("orange")
     spaghetti_id = add_dish("spaghetti")
     applePie_id = add_dish("applie pie")
+
+    dishes = [orange_id, spaghetti_id, applePie_id]
 
     assert orange_id != spaghetti_id and orange_id != applePie_id and applePie_id != spaghetti_id
 
 #2
 def test_get_orange_by_id():
-    global orange_id
-    response = connectionController.http_get(f"dishes/{orange_id}")
+    global dishes
+    response = connectionController.http_get(f"dishes/{dishes[0]}")
     assert_err_code(response, error_code=200)
     assert response.json()['sodium'] <= 1.1 and 0.9 <= response.json()['sodium']
 
@@ -34,6 +37,24 @@ def test_get_bad_dish():
     response = connectionController.http_get("blah")
     assert_err_code(response, 404)
     assert response.json() == -3
+
+#5
+def test_post_orange_twice():
+    orange_id = add_dish("orange")
+    assert orange_id == -2
+
+#6
+def test_post_meal():
+    meal = {
+        "name" : "delicious",
+        "appetizer" : dishes[0],
+        "main" : dishes[1],
+        "dessert" : dishes[2]
+    }
+
+    response = connectionController.http_post("meals", meal)
+    assert_valid_added_resource(response)
+
 
 # def test_dishes_sanity():
 #     response = connectionController.http_get("dishes")
