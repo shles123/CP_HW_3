@@ -1,365 +1,147 @@
-import connectionController
-from assertions import *
-import database
-from restApiController import *
-
-
-# tests for dish API
-dishes = []
-
-#1
-def test_post_dishes():
-    global dishes
-
-    orange_id = add_dish("orange")
-    spaghetti_id = add_dish("spaghetti")
-    applePie_id = add_dish("applie pie")
-
-    dishes = [orange_id, spaghetti_id, applePie_id]
-
-    assert orange_id != spaghetti_id and orange_id != applePie_id and applePie_id != spaghetti_id
-
-#2
-def test_get_orange_by_id():
-    global dishes
-    response = connectionController.http_get(f"dishes/{dishes[0]}")
-    assert_err_code(response, error_code=200)
-    assert response.json()['sodium'] <= 1.1 and 0.9 <= response.json()['sodium']
-
-#3
-def test_get_all_dishes():
-    response = connectionController.http_get("dishes")
-    assert_err_code(response, 200)
-    assert len(response.json()) == 3
-
-#4
-def test_post_bad_dish():
-    response = connectionController.http_post("dishes", {"name" : "blah"})
-    assert response.status_code in [404, 422, 400]
-    assert response.json() == -3
-
-#5
-def test_post_orange_twice():
-    # orange_id = add_dish("orange")
-    response = connectionController.http_post("dishes", {"name" : "orange"})
-    assert response.json() == -2
-
-#6
-def test_post_meal():
-    meal = {
-        "name" : "delicious",
-        "appetizer" : dishes[0],
-        "main" : dishes[1],
-        "dessert" : dishes[2]
-    }
-
-    response = connectionController.http_post("meals", meal)
-    assert_valid_added_resource(response)
-
-#7
-def test_get_meal():
-    response = connectionController.http_get("meals")
-    assert_err_code(response, 200)
-    assert len(response.json()) == 1
-    assert response.json()["1"]["cal"] <=500 and 400<=response.json()["1"]["cal"]
-
-#8
-def test_post_delicious_twice():
-    meal = {
-        "name" : "delicious",
-        "appetizer" : dishes[0],
-        "main" : dishes[1],
-        "dessert" : dishes[2]
-    }
-    response = connectionController.http_post("meals", meal)
-    assert response.json() == -2
-    assert response.status_code in [400, 422]
-
-# def test_dishes_sanity():
-#     response = connectionController.http_get("dishes")
-#     assert response.status_code == 200
-#     assert response.json() == {}
-
-
-# def test_get_not_exists_dish_by_id():
-#     NOT_EXISTS_DISH_ID = 11235
-#     response = connectionController.http_get(f"dishes/{NOT_EXISTS_DISH_ID}")
-#     assert_err_code(response, error_code=404)
-#     assert_ret_value(response, returned_value=-5)
+import requests
+import json
 
-
-# def test_get_not_exists_dish_by_name():
-#     NOT_EXISTS_DISH = "not_exists_dish"
-#     response = connectionController.http_get(f"dishes/{NOT_EXISTS_DISH}")
-#     assert_err_code(response, error_code=404)
-#     assert_ret_value(response, returned_value=-5)
 
+class ConnectionController:
 
-# def test_add_dish_identifier_is_positive_integer():
-#     add_dish("rice")
+    URL = "http://127.0.0.1:8000"
 
+    @staticmethod
+    def http_get(resource: str):
+        response = requests.get(url=f"{ConnectionController.URL}/{resource}", headers={"Content-Type": "application/json"})
+        return response
 
-# def test_get_dish_by_id():
-#     milk_id = add_dish(database.MILK["name"])
-#     response = connectionController.http_get(f"dishes/{milk_id}")
-#     assert_err_code(response, error_code=200)
-#     assert_dish(response.json(), database.MILK)
+    @staticmethod
+    def http_delete(resource: str):
+        response = requests.delete(url=f"{ConnectionController.URL}/{resource}", headers={"Content-Type": "application/json"})
+        return response
 
+    @staticmethod
+    def http_post(resource: str, data: {}):
+        response = requests.post(url=f"{ConnectionController.URL}/{resource}", headers={"Content-Type": "application/json"},
+                                 data=json.dumps(data))
+        return response
 
-# def test_get_dish_by_name():
-#     dish_name = database.FOCACCIA["name"]
-#     add_dish(dish_name)
-#     response = connectionController.http_get(f"dishes/{dish_name}")
-#     assert_err_code(response, error_code=200)
-#     assert_dish(response.json(), database.FOCACCIA)
+    @staticmethod
+    def http_put(resource: str, data: {}):
+        response = requests.put(url=f"{ConnectionController.URL}/{resource}", headers={"Content-Type": "application/json"},
+                                data=json.dumps(data))
+        return response
 
+    @staticmethod
+    def post_raw(resource: str, data: {}, headers: {}):
+        response = requests.post(url=f"{ConnectionController.URL}/{resource}", headers=headers, data=json.dumps(data))
+        return response
 
-# def test_get_all_dishes():
-#     response = connectionController.http_get("dishes")
-#     assert_err_code(response, error_code=200)
+    @staticmethod
+    def add_dish(name: str) -> int:
+        dish = {"name": name}
+        response = ConnectionController.http_post("dishes", dish)
+        Assertion.assert_valid_added_resource(response)
+        return response.json()
 
-#     DISH_INDEX = "1"
-#     dishes = response.json()
-#     assert len(dishes) > 0
-#     dish = dishes[DISH_INDEX]
+    @staticmethod
+    def add_meal(name: str, appetizer_id: int, main_id: int, dessert_id: int) -> int:
+        meal = {
+            "name": name,
+            "appetizer": appetizer_id,
+            "main": main_id,
+            "dessert": dessert_id
+        }
+        response = ConnectionController.http_post("meals", meal)
+        Assertion.assert_valid_added_resource(response)
+        assert response.json() > 0
+        return response.json()
 
-#     assert "ID" in dish
-#     assert "name" in dish
-#     assert "cal" in dish
-#     assert "size" in dish
-#     assert "sodium" in dish
-#     assert "sugar" in dish
 
+class Assertion:
 
-# def test_dish_api_media_not_supported():
-#     data = {"name": "rice"}
-#     response = connectionController.post_raw("dishes", data, {})
-#     assert_err_code(response, error_code=415)
-#     assert_ret_value(response, 0)
+    @staticmethod
+    def assert_ret_value(response: requests.Response, returned_value: any):
+        assert response.json() == returned_value
 
+    @staticmethod
+    def assert_err_code(response: requests.Response, error_code: int):
+        assert response.status_code == error_code
 
-# def test_add_dish_name_is_not_specified():
-#     data = {"no name key": "rice"}
-#     response = connectionController.http_post("dishes", data)
-#     assert_err_code(response, error_code=422)
-#     assert_ret_value(response, -1)
+    @staticmethod
+    def assert_valid_added_resource(response: requests.Response):
+        assert response.status_code == 201
 
 
-# def test_add_exists_dish():
-#     DISH_NAME = "water"
-#     add_dish(DISH_NAME)
-#     response = connectionController.http_post("dishes", {"name": DISH_NAME})
-#     assert_err_code(response, error_code=422)
-#     assert_ret_value(response, -2)
+orange_dish_id: int = None
+spaghetti_dish_id: int = None
+apple_pie_dish_id: int = None
 
 
-# def test_add_invalid_dish():
-#     INVALID_DISH = {"name": "invalid dish"}
-#     response = connectionController.http_post("dishes", INVALID_DISH)
-#     assert_err_code(response, error_code=422)
-#     assert_ret_value(response, -3)
+def test_1():
+    global orange_dish_id, apple_pie_dish_id, spaghetti_dish_id
+    orange_dish_id = ConnectionController.add_dish("orange")
+    spaghetti_dish_id = ConnectionController.add_dish("spaghetti")
+    apple_pie_dish_id = ConnectionController.add_dish("apple pie")
+    assert orange_dish_id != spaghetti_dish_id
+    assert orange_dish_id != apple_pie_dish_id
+    assert spaghetti_dish_id != apple_pie_dish_id
 
 
-# def test_delete_all_dishes():
-#     response = connectionController.http_delete("dishes")
-#     assert_err_code(response, error_code=405)
+def test_2():
+    global orange_dish_id
+    assert orange_dish_id is not None
 
+    response = ConnectionController.http_get(f"dishes/{orange_dish_id}")
+    Assertion.assert_err_code(response, error_code=200)
 
-# def test_delete_not_exists_dish_by_id():
-#     response = connectionController.http_delete("dishes/123110923")
-#     assert_err_code(response, error_code=404)
-#     assert_ret_value(response, -5)
+    orange_sodium = response.json()["sodium"]
+    assert 0.9 <= orange_sodium <= 1.1
 
 
-# def test_delete_not_exists_dish_by_name():
-#     response = connectionController.http_delete("dishes/not_exists_dish")
-#     assert_err_code(response, error_code=404)
-#     assert_ret_value(response, -5)
+def test_3():
+    response = ConnectionController.http_get("dishes")
+    Assertion.assert_err_code(response, error_code=200)
 
+    dishes = response.json()
+    assert len(dishes) == 3
 
-# def test_delete_dish_by_id():
-#     dish_id = add_dish("pasta")
-#     response = connectionController.http_delete(f"dishes/{dish_id}")
-#     assert_err_code(response, error_code=200)
-#     assert_ret_value(response, dish_id)
 
+def test_4():
+    INVALID_DISH = {"name": "blah"}
+    response = ConnectionController.http_post("dishes", INVALID_DISH)
+    Assertion.assert_ret_value(response, -3)
+    assert response.status_code == 404 or response.status_code == 400 or response.status_code == 422
 
-# def test_delete_dish_by_name():
-#     DISH_NAME = "pasta"
-#     dish_id = add_dish(DISH_NAME)
-#     response = connectionController.http_delete(f"dishes/{DISH_NAME}")
-#     assert_err_code(response, error_code=200)
-#     assert_ret_value(response, dish_id)
 
+def test_5():
+    DISH_NAME = "orange"
+    response = ConnectionController.http_post("dishes", {"name": DISH_NAME})
+    Assertion.assert_ret_value(response, -2)
+    assert response.status_code == 404 or response.status_code == 400 or response.status_code == 422
 
-# # tests for meals API
 
+def test_6():
+    global orange_dish_id, apple_pie_dish_id, spaghetti_dish_id
+    assert orange_dish_id is not None
+    assert apple_pie_dish_id is not None
+    assert spaghetti_dish_id is not None
 
-# def test_meals_sanity():
-#     NO_MEALS = {}
-#     response = connectionController.http_get("meals")
-#     assert_err_code(response, error_code=200)
-#     assert_ret_value(response, NO_MEALS)
+    ConnectionController.add_meal("delicious", orange_dish_id, spaghetti_dish_id, apple_pie_dish_id)
 
 
-# def test_first_meal_id_is_positive_integer():
-#     appetizer_id = add_dish("green salad")
-#     main_id = add_dish("sea bass")
-#     dessert_id = add_dish("granola")
+def test_7():
+    response = ConnectionController.http_get("meals")
+    Assertion.assert_err_code(response, error_code=200)
+    meals = response.json()
+    assert len(meals) == 1
 
-#     add_meal("healthy fish meal", appetizer_id, main_id, dessert_id)
+    for key in meals:
+        assert 400 <= meals[key]["cal"] <= 500
 
 
-# def test_add_second_meal():
-#     appetizer_id = add_dish("pasta")
-#     main_id = add_dish("salmon")
-#     dessert_id = add_dish("chocolate cake")
-#     add_meal("fatty fish meal", appetizer_id, main_id, dessert_id)
-
-
-# def test_meal_api_media_not_supported():
-#     meal = {"name": "test_meal_api_media_not_supported meal", "appetizer": 1, "main": 1, "dessert": 1}
-#     response = connectionController.post_raw("meals", meal, {})
-#     print(response)
-#     assert_err_code(response, error_code=415)
-#     assert_ret_value(response, returned_value=0)
-
-
-# def test_add_meal_missing_parameter():
-#     MISSING_APPTIZER = {"name": "test_add_meal_missing_parameter meal", "main": 1, "dessert": 1}
-#     response = connectionController.http_post("meals", MISSING_APPTIZER)
-#     assert_err_code(response, error_code=422)
-#     assert_ret_value(response, returned_value=-1)
-
-
-# def test_add_exists_meal():
-#     meal = {"name": "test_add_exists_meal meal", "appetizer": 1, "main": 1, "dessert": 1}
-#     add_meal(meal["name"], meal["appetizer"], meal["main"], meal["dessert"])
-
-#     response = connectionController.http_post("meals", meal)
-#     assert_err_code(response, error_code=422)
-#     assert_ret_value(response, returned_value=-2)
-
-
-# def test_add_meal_without_existed_dessert():
-#     NOT_EXISTS_DESSERT = 1231284
-#     meal = {"name": "test_add_meal_without_existed_dessert meal", "appetizer": 1, "main": 1, "dessert": NOT_EXISTS_DESSERT}
-#     response = connectionController.http_post("meals", meal)
-#     assert_err_code(response, error_code=422)
-#     assert_ret_value(response, returned_value=-6)
-
-
-# def test_get_all_meals():
-#     response = connectionController.http_get("meals")
-#     assert_err_code(response, error_code=200)
-
-#     meals = response.json()
-#     assert len(meals) > 0
-
-#     DISH_INDEX = "1"
-#     meal = meals[DISH_INDEX]
-#     assert_meal(meal)
-
-
-# def test_get_meal_by_id():
-#     mushroom_id = add_dish(database.MUSHROOM["name"])
-#     risotto_id = add_dish(database.RISOTTO["name"])
-#     brioche_id = add_dish(database.BRIOCHE["name"])
-#     meal_id = add_meal("test_get_meal_by_id meal", mushroom_id, risotto_id, brioche_id)
-
-#     response = connectionController.http_get(f"meals/{meal_id}")
-#     assert_err_code(response, error_code=200)
-
-#     meal = response.json()
-#     assert_meal(meal)
-#     assert_meal_values(meal, database.MUSHROOM, database.RISOTTO, database.BRIOCHE)
-
-
-# def test_get_meal_by_name():
-#     hummus_id = add_dish(database.HUMMUS["name"])
-#     noodles_id = add_dish(database.NOODLES["name"])
-#     pineapple_id = add_dish(database.PINEAPPLE["name"])
-#     MEAL_NAME = "test_get_meal_by_name meal"
-#     add_meal(MEAL_NAME, hummus_id, noodles_id, pineapple_id)
-
-#     c
-
-#     meal = response.json()
-#     assert_meal(meal)
-#     assert_meal_values(meal, database.HUMMUS, database.NOODLES, database.PINEAPPLE)
-
-
-# def test_get_not_existed_meal_by_id():
-#     NOT_EXISTS_MEAL_ID = 8947101
-#     assert_not_existed_meal(NOT_EXISTS_MEAL_ID)
-
-
-# def test_get_not_existed_meal_by_name():
-#     NOT_EXISTS_MEAL = "test_get_not_existed_meal_by_name meal"
-#     assert_not_existed_meal(NOT_EXISTS_MEAL)
-
-
-# def test_change_meal():
-#     bread_id = add_dish(database.BREAD["name"])
-#     salad_id = add_dish(database.SALAD["name"])
-#     watermelon_id = add_dish(database.WATERMELON["name"])
-#     peach_id = add_dish(database.PEACH["name"])
-
-#     meal_id = add_meal("test_change_meal meal", bread_id, salad_id, watermelon_id)
-#     meal = {"name": "test_change_meal meal", "appetizer": bread_id, "main": salad_id, "dessert": peach_id}
-#     response = connectionController.http_put(f"meals/{meal_id}", meal)
-#     assert_err_code(response, error_code=200)
-#     assert_ret_value(response, returned_value=meal_id)
-
-#     response = connectionController.http_get(f"meals/{meal_id}")
-#     assert_err_code(response, error_code=200)
-
-#     meal = response.json()
-#     assert_meal_values(meal, database.BREAD, database.SALAD, database.PEACH)
-
-
-# def test_delete_meal_by_id():
-#     meal_id = add_meal("meal 5", 1, 1, 1)
-#     response = connectionController.http_delete(f"meals/{meal_id}")
-#     assert_err_code(response, error_code=200)
-#     assert response.json() == meal_id
-#     assert_not_existed_meal(meal_id)
-
-
-# def test_delete_meal_by_name():
-#     MEAL_NAME = "meal 6"
-#     meal_id = add_meal(MEAL_NAME, 1, 1, 1)
-#     response = connectionController.http_delete(f"meals/{MEAL_NAME}")
-#     assert_err_code(response, error_code=200)
-#     assert response.json() == meal_id
-#     assert_not_existed_meal(meal_id)
-
-
-# def test_delete_no_existed_meal_by_id():
-#     NOT_EXISTED_MEAL = 1231258142
-#     response = connectionController.http_delete(f"meals/{NOT_EXISTED_MEAL}")
-#     assert_err_code(response, error_code=404)
-#     assert_ret_value(response, returned_value=-5)
-
-
-# def test_delete_no_existed_meal_by_name():
-#     NOT_EXISTED_MEAL = "not existed meal 102948094"
-#     response = connectionController.http_delete(f"meals/{NOT_EXISTED_MEAL}")
-#     assert_err_code(response, error_code=404)
-#     assert_ret_value(response, returned_value=-5)
-
-#if dish is deleted then meals that contain the dish should change to NONE
-# def test_delete_used_dish():
-#     ravioli_dish_id = add_dish("ravioli")
-#     soap_dish_id = add_dish("tomato")
-#     cake_dish_id = add_dish("brownies")
-#     meal_id = add_meal("ravioli meal", soap_dish_id, ravioli_dish_id, cake_dish_id)
-
-#     response = connectionController.http_delete(f"dishes/{ravioli_dish_id}")
-#     assert_err_code(response, error_code=200)
-
-#     meal = connectionController.http_get(f"meals/{meal_id}").json()
-#     assert meal["main"] is None
-#     assert meal["appetizer"] == soap_dish_id
-#     assert meal["dessert"] == cake_dish_id
-
+def test_8():
+    global orange_dish_id, apple_pie_dish_id, spaghetti_dish_id
+    assert orange_dish_id is not None
+    assert apple_pie_dish_id is not None
+    assert spaghetti_dish_id is not None
+    meal = {"name": "delicious", "appetizer": orange_dish_id, "main": spaghetti_dish_id, "dessert": apple_pie_dish_id}
+    response = ConnectionController.http_post("meals", meal)
+    Assertion.assert_ret_value(response, returned_value=-2)
+    assert response.status_code == 400 or response.status_code == 422
